@@ -23,43 +23,85 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        /* 🚨 CHANGED: Body now acts as a black background for the 16:9 container 🚨 */
         body {
-            background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-main);
+            background-color: #000000; color: var(--text-main); font-family: var(--font-main);
             overflow: hidden; width: 100vw; height: 100vh;
-            perspective: 2500px; 
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* ================= 🚨 NEW: 16:9 MASTER APP CONTAINER 🚨 ================= */
+        #app-container {
+            position: relative;
+            width: 100vw;
+            height: 56.25vw; /* 16:9 Aspect Ratio */
+            max-height: 100vh;
+            max-width: 177.78vh; /* 16:9 Aspect Ratio */
+            background-color: var(--bg-color);
+            overflow: hidden;
+            perspective: 2500px; /* Perspective moved to container */
+            container-type: size; /* Enables modern container queries (cqw, cqh) */
+            box-shadow: 0 0 50px rgba(0,0,0,1); /* Deep shadow blending into the black borders */
+        }
+
+        /* ================= 🚨 NEW: MOBILE PORTRAIT ORIENTATION BLOCKER 🚨 ================= */
+        #orientation-block {
+            display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 999999999;
+            flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; color: #ffffff; font-family: var(--font-main);
+        }
+        .phone-icon {
+            width: 60px; height: 100px; border: 4px solid #ffffff; border-radius: 10px;
+            margin-bottom: 25px; position: relative;
+            animation: rotatePhone 2s ease-in-out infinite alternate;
+        }
+        .phone-icon::after {
+            content: ''; position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%);
+            width: 15px; height: 15px; background: #ffffff; border-radius: 50%;
+        }
+        .orientation-message { font-size: 1.2rem; line-height: 1.8; letter-spacing: 2px; padding: 0 20px; }
+        .orientation-message span { color: var(--accent-color); font-weight: 700; letter-spacing: 4px; }
+
+        @keyframes rotatePhone {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(90deg); }
+        }
+
+        /* Detect Portrait on Mobile Devices */
+        @media screen and (max-width: 900px) and (orientation: portrait) {
+            #orientation-block { display: flex; }
+            #app-container { display: none !important; }
         }
 
         /* ================= GLOBAL BOTTOM-RIGHT SPINNER ================= */
         .video-spinner {
-            position: absolute; bottom: 50px; right: 50px; 
+            position: absolute; bottom: 5cqh; right: 5cqw; /* Responsive positioning */
             width: 40px; height: 40px;
             border: 3px solid rgba(255, 255, 255, 0.15);
             border-top: 3px solid #ffffff; border-radius: 50%;
             animation: spinLoader 1s linear infinite;
         }
-        @keyframes spinLoader {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spinLoader { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* ================= 1. INITIAL SPINNER OVERLAY (Phase 1) ================= */
         #initial-spinner-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000000; z-index: 9999999; 
             display: block; opacity: 1; transition: opacity 1s ease;
         }
 
-        /* ================= 🚨 2. PRELOADER (ANIMATED DISCLAIMER) (Phase 2) 🚨 ================= */
+        /* ================= 2. PRELOADER (ANIMATED DISCLAIMER) (Phase 2) ================= */
         #preloader {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000000; z-index: 999999;
             display: flex; justify-content: center; align-items: center;
             transition: opacity 1s ease, visibility 1s ease;
         }
         
         .disclaimer-text {
-            font-family: var(--font-main); font-size: 1.1rem; line-height: 1.8; letter-spacing: 2px;
-            color: rgba(255, 255, 255, 0.85); text-align: center; max-width: 800px; padding: 0 20px;
+            font-family: var(--font-main); font-size: 2.2cqh; line-height: 1.8; letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.85); text-align: center; max-width: 80%; padding: 0 20px;
             opacity: 0; transform: translateY(30px);
         }
         
@@ -67,36 +109,25 @@
             animation: fadeInOutDisclaimer 6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
         
-        /* 🚨 NEW: Red Animated Box for Heading 🚨 */
         .disclaimer-text strong.main-title {
-            font-size: 1.6rem; color: #ffffff; letter-spacing: 8px; margin-bottom: 25px; 
-            display: inline-block; padding: 12px 40px; border-radius: 8px;
+            font-size: 3.5cqh; color: #ffffff; letter-spacing: 8px; margin-bottom: 3cqh; 
+            display: inline-block; padding: 1.5cqh 4cqw; border-radius: 8px;
             border: 1px solid rgba(229, 9, 20, 0.6);
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8); /* Ensures text is always sharp */
-            animation: pulseDisclaimerBox 2s infinite alternate; /* Background fading animation */
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            animation: pulseDisclaimerBox 2s infinite alternate;
         }
 
-        /* 🚨 Keyframes for fading only the box background, NOT the text 🚨 */
         @keyframes pulseDisclaimerBox {
-            0% { 
-                background-color: rgba(100, 0, 0, 0.2); 
-                box-shadow: 0 0 10px rgba(229, 9, 20, 0.1); 
-            }
-            100% { 
-                background-color: rgba(229, 9, 20, 0.85); /* Dark Red matching UI */
-                box-shadow: 0 0 40px rgba(229, 9, 20, 0.7), inset 0 0 15px rgba(255,255,255,0.1); 
-            }
+            0% { background-color: rgba(100, 0, 0, 0.2); box-shadow: 0 0 10px rgba(229, 9, 20, 0.1); }
+            100% { background-color: rgba(229, 9, 20, 0.85); box-shadow: 0 0 40px rgba(229, 9, 20, 0.7), inset 0 0 15px rgba(255,255,255,0.1); }
         }
 
         .disclaimer-details {
-            font-size: 0.95rem; color: #cccccc; margin-top: 30px; padding-top: 25px;
+            font-size: 1.8cqh; color: #cccccc; margin-top: 3cqh; padding-top: 2.5cqh;
             border-top: 1px solid rgba(255, 255, 255, 0.15); line-height: 2; letter-spacing: 1.5px;
         }
-        .disclaimer-details b {
-            color: #ffffff; font-weight: 600; letter-spacing: 2px;
-        }
+        .disclaimer-details b { color: #ffffff; font-weight: 600; letter-spacing: 2px; }
 
-        /* Slide up and fade in animation for the whole disclaimer container */
         @keyframes fadeInOutDisclaimer {
             0% { opacity: 0; transform: scale(0.95) translateY(20px); filter: blur(10px); }
             15% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
@@ -106,35 +137,30 @@
 
         /* ================= 2.5. COMPANY LOGO SCREEN (Phase 2.5) ================= */
         #logo-screen {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000000; z-index: 999998; 
             display: none; justify-content: center; align-items: center;
             opacity: 0; transition: opacity 1s ease;
         }
         .company-logo-img {
-            max-width: 350px; width: 60vw;
+            width: 30%; /* Responsive to container */
             filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
         }
-        .company-logo-img.animate-zoom {
-            animation: logoZoom 4s linear forwards;
-        }
-        @keyframes logoZoom {
-            0% { transform: scale(0.95); }
-            100% { transform: scale(1.05); }
-        }
+        .company-logo-img.animate-zoom { animation: logoZoom 4s linear forwards; }
+        @keyframes logoZoom { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
 
         /* ================= 3. INTRO SCREEN (Phase 3) ================= */
         #intro-section {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
             z-index: 100; background: transparent; transition: opacity 1s ease 0.5s, visibility 1s ease 0.5s;
         }
-        .bar { position: absolute; left: 0; width: 100%; height: 50vh; background: #000; z-index: 105; transition: transform 2.5s cubic-bezier(0.8, 0, 0.2, 1); }
+        .bar { position: absolute; left: 0; width: 100%; height: 50%; background: #000; z-index: 105; transition: transform 2.5s cubic-bezier(0.8, 0, 0.2, 1); }
         .bar-top { top: 0; } .bar-bottom { bottom: 0; }
         .page-loaded .bar-top { transform: translateY(-100%); } .page-loaded .bar-bottom { transform: translateY(100%); }
 
         .logo-text {
-            font-family: var(--font-main); font-weight: 500; letter-spacing: 0.25em; margin-right: -0.25em;
+            font-family: var(--font-main); font-weight: 500; letter-spacing: 0.25em; margin-right: -0.25em; font-size: 3.5cqw;
             color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.6);
             background-image: linear-gradient(-45deg, #777777 35%, #ffffff 48%, #f0f0f0 52%, #ffffff 56%, #777777 65%);
             background-size: 300% auto; background-position: 150% center; -webkit-background-clip: text;
@@ -146,35 +172,35 @@
 
         /* ================= 3.5. RANDOM LOADING SCREEN (Phase 4) ================= */
         #random-loader {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000000; z-index: 95; 
             display: none; opacity: 0; transition: opacity 1s ease;
         }
 
         /* ================= 4. BLACK TRANSITION OVERLAY ================= */
         #black-transition {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000000; z-index: 90;
             opacity: 1; transition: opacity 1.5s ease; pointer-events: none;
         }
 
         /* ================= AMBIENT STUDIO BACKGROUND ================= */
         .cinematic-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(45deg, #050000, #2b0206, #0a0002, #3a0309);
             background-size: 400% 400%; opacity: 0; 
             animation: bgFadeIn 2s ease-in-out forwards, gradientShift 15s ease infinite; z-index: -3;
         }
 
         .cinematic-bg-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at center, transparent 15%, #000000 90%);
             z-index: -2; pointer-events: none;
         }
 
         .ambient-glow {
-            position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%);
-            width: 70vw; height: 50vh;
+            position: absolute; top: 55%; left: 50%; transform: translate(-50%, -50%);
+            width: 70%; height: 50%;
             background: radial-gradient(ellipse at center, rgba(229,9,20,0.15) 0%, transparent 65%);
             z-index: -1; pointer-events: none;
             animation: pulseAmbient 8s ease-in-out infinite alternate;
@@ -192,7 +218,7 @@
         #main-app.show-app { opacity: 1; visibility: visible; }
 
         header {
-            position: absolute; top: 0; left: 0; width: 100%; padding: 40px 60px;
+            position: absolute; top: 0; left: 0; width: 100%; padding: 4% 5%;
             display: flex; justify-content: space-between; align-items: center; z-index: 20;
             opacity: 0; transform: translateY(-30px);
             transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -203,12 +229,12 @@
         .header-logo span { color: var(--accent-color); text-shadow: 0 0 20px var(--accent-glow); }
         .header-title { font-size: 1.1rem; letter-spacing: 6px; text-transform: none; color: rgba(255,255,255,0.6); }
 
-        /* ================= 3D SLIDER & PERFECT MIRROR ================= */
-        .slider-container { width: 100%; height: 100vh; display: flex; align-items: center; perspective: 3000px; position: relative; }
+        /* ================= 3D SLIDER ================= */
+        .slider-container { width: 100%; height: 100%; display: flex; align-items: center; perspective: 3000px; position: relative; }
 
         .video-track {
             display: flex; gap: 0px; width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; 
-            padding: 180px calc(50vw - (var(--card-width) / 2)) 200px calc(50vw - (var(--card-width) / 2));
+            padding: 5% calc(50% - (var(--card-width) / 2)) 5% calc(50% - (var(--card-width) / 2));
             -ms-overflow-style: none; scrollbar-width: none; cursor: grab; transform-style: preserve-3d;
         }
         .video-track::-webkit-scrollbar { display: none; }
@@ -224,7 +250,7 @@
         /* ================= 🚨 EPIC CSS 3D FLYING ANIMATION 🚨 ================= */
         .card-intro-animator {
             width: 100%; height: 100%; transform-style: preserve-3d;
-            transform: translate3d(-100vw, 100vh, -3000px) rotateX(1080deg) rotateY(720deg) scale(0.1);
+            transform: translate3d(-100%, 100%, -3000px) rotateX(1080deg) rotateY(720deg) scale(0.1);
             opacity: 0;
         }
 
@@ -234,9 +260,9 @@
         }
 
         @keyframes magicCarpetFly {
-            0% { transform: translate3d(-100vw, 80vh, -3000px) rotateX(1080deg) rotateY(720deg) scale(0.1); opacity: 0; }
-            30% { transform: translate3d(-50vw, -50vh, -1500px) rotateX(720deg) rotateY(360deg) scale(0.4); opacity: 0.5; }
-            60% { transform: translate3d(50vw, -40vh, -800px) rotateX(360deg) rotateY(180deg) scale(0.7); opacity: 0.8; }
+            0% { transform: translate3d(-100%, 80%, -3000px) rotateX(1080deg) rotateY(720deg) scale(0.1); opacity: 0; }
+            30% { transform: translate3d(-50%, -50%, -1500px) rotateX(720deg) rotateY(360deg) scale(0.4); opacity: 0.5; }
+            60% { transform: translate3d(50%, -40%, -800px) rotateX(360deg) rotateY(180deg) scale(0.7); opacity: 0.8; }
             100% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) scale(1); opacity: 1; }
         }
 
@@ -318,7 +344,7 @@
 
         @media (max-width: 768px) {
             :root { --card-width: 340px; --card-height: 191px; }
-            header { padding: 20px; flex-direction: column; gap: 5px; }
+            header { padding: 4% 5%; flex-direction: column; gap: 5px; }
             .card-title { font-size: 1.8rem; }
             .btn-play { width: 50px; height: 50px; }
             .btn-play::after { border-width: 7px 0 7px 12px; margin-left: 5px; }
@@ -326,7 +352,7 @@
         
         /* ================= SAKA VIDEO PLAYER (MODAL) ================= */
         .video-modal {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background-color: #000;
             z-index: 9999; display: flex; justify-content: center; align-items: center;
             opacity: 0; visibility: hidden; pointer-events: none;
@@ -334,7 +360,6 @@
         }
         .video-modal.show { opacity: 1; visibility: visible; pointer-events: auto; }
 
-        /* Overlay Close Button */
         .btn-close-modal {
             position: absolute; top: 30px; right: 40px; font-size: 2.5rem; color: #fff;
             background: rgba(0, 0, 0, 0.4); border-radius: 50%;
@@ -344,19 +369,14 @@
         }
         .btn-close-modal:hover { background: var(--accent-color); transform: scale(1.1) rotate(90deg); border-color: transparent; }
 
-        /* Edge-to-Edge Container */
         .saka-player-container {
-            width: 100vw; height: 100vh;
-            background-color: #000; overflow: hidden;
-            position: relative;
-            
-            /* Opening scale */
+            width: 100%; height: 100%;
+            background-color: #000; overflow: hidden; position: relative;
             transform: scale(0.85); opacity: 0; 
             transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s ease;
         }
         .video-modal.show .saka-player-container { transform: scale(1); opacity: 1; }
 
-        /* CLOSING ANIMATION */
         .video-modal.closing .saka-player-container {
             transform: scale(0.3) translateX(-150vw); opacity: 0;
             transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s ease;
@@ -364,11 +384,9 @@
 
         #saka-video { width: 100%; height: 100%; object-fit: cover; background: #000; }
         
-        /* ================= VIDEO LOADING SPINNER OVERLAY ================= */
         .video-loader-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #000000; 
-            z-index: 5000; display: block; opacity: 1; pointer-events: none;
+            background-color: #000000; z-index: 5000; display: block; opacity: 1; pointer-events: none;
             transition: opacity 0.5s ease;
         }
         .video-loader-overlay.hidden { opacity: 0; }
@@ -377,150 +395,159 @@
 </head>
 <body>
 
-    <!-- 1. INITIAL SPINNER OVERLAY (Phase 1) -->
-    <div id="initial-spinner-screen">
-        <div class="video-spinner"></div>
-    </div>
-
-    <!-- 2. PRELOADER (ANIMATED DISCLAIMER) -->
-    <div id="preloader">
-        <div class="disclaimer-text" id="disclaimer-text">
-            <!-- 🚨 Red Pulsating Box for Heading 🚨 -->
-            <strong class="main-title">DISCLAIMER</strong><br>
-            
-            This webpage is a concept design created for demonstration and educational purposes.<br>
-            All video content and images are placeholders and do not represent actual commercial products.
-            
-            <div class="disclaimer-details">
-                <b>Created By:</b> GOURAB LAYAK<br>
-                <b>Company:</b> Nexus Infotech Pvt. Ltd.<br>
-                <b>Address:</b> Kashi H, Kalna, Asansol, Paschim Bardhaman, 713340
-            </div>
+    <!-- 🚨 PORTRAIT WARNING SCREEN (MOBILE ONLY) 🚨 -->
+    <div id="orientation-block">
+        <div class="phone-icon"></div>
+        <div class="orientation-message">
+            Please rotate your device to<br><span>LANDSCAPE MODE</span><br>to enter Cinebox.
         </div>
     </div>
 
-    <!-- 2.5 COMPANY LOGO SCREEN (Phase 2.5) -->
-    <div id="logo-screen">
-        <img src="https://cgasansol.github.io/adminportal/company_logo.png" class="company-logo-img" id="company-logo" alt="Company Logo">
-    </div>
+    <!-- 🚨 MASTER 16:9 CONTAINER 🚨 -->
+    <div id="app-container">
 
-    <!-- 3. INTRO SECTION (Phase 3 - "Created by...") -->
-    <div id="intro-section">
-        <div class="bar bar-top"></div>
-        <div class="bar bar-bottom"></div>
-        <div class="logo-text" style="font-size: 3.5vw;">Created by GOURAB LAYAK</div>
-    </div>
+        <!-- 1. INITIAL SPINNER OVERLAY (Phase 1) -->
+        <div id="initial-spinner-screen">
+            <div class="video-spinner"></div>
+        </div>
 
-    <!-- 3.5 RANDOM LOADING SCREEN (Phase 4) -->
-    <div id="random-loader">
-        <div class="video-spinner"></div>
-    </div>
-
-    <!-- 4. BLACK TRANSITION SCREEN (Curtain before Main App) -->
-    <div id="black-transition"></div>
-
-    <!-- Animated Backgrounds (Hidden behind Black Transition initially) -->
-    <div class="cinematic-bg"></div><div class="cinematic-bg-overlay"></div><div class="ambient-glow"></div>
-
-    <!-- 5. MAIN APP (Phase 5) -->
-    <div id="main-app">
-        <header>
-            <div class="header-logo">CINE<span>BOX</span></div>
-            <div class="header-title" style="text-transform: none;">Created by GOURAB LAYAK</div>
-        </header>
-
-        <div class="slider-container">
-            <div class="video-track" id="video-track">
+        <!-- 2. PRELOADER (ANIMATED DISCLAIMER) -->
+        <div id="preloader">
+            <div class="disclaimer-text" id="disclaimer-text">
+                <strong class="main-title">DISCLAIMER</strong><br>
+                This webpage is a concept design created for demonstration and educational purposes.<br>
+                All video content and images are placeholders and do not represent actual commercial products.
                 
-                <div class="card-wrapper" style="--i: 0;">
-                    <div class="card-intro-animator">
-                        <div class="content-card">
-                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1571243545084-7ca0bd0a7a3b?q=80&w=1600&auto=format&fit=crop');"></div>
-                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Crimson Night</h3>
-                                <div class="card-meta-container"><div class="card-meta"><span>98% Match</span> 2024</div></div>
-                                <div class="card-controls"><button class="btn-play"></button></div>
-                            </div></div>
-                        </div>
-                    </div>
+                <div class="disclaimer-details">
+                    <b>Created By:</b> GOURAB LAYAK<br>
+                    <b>Company:</b> Nexus Infotech Pvt. Ltd.<br>
+                    <b>Address:</b> Kashi H, Kalna, Asansol, Paschim Bardhaman, 713340
                 </div>
-
-                <div class="card-wrapper" style="--i: 1;">
-                    <div class="card-intro-animator">
-                        <div class="content-card">
-                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1493225457124-a1a2a5956093?q=80&w=1600&auto=format&fit=crop');"></div>
-                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Shadow Walk</h3>
-                                <div class="card-meta-container"><div class="card-meta"><span>95% Match</span> 2023</div></div>
-                                <div class="card-controls"><button class="btn-play"></button></div>
-                            </div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-wrapper" style="--i: 2;">
-                    <div class="card-intro-animator">
-                        <div class="content-card">
-                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=1600&auto=format&fit=crop');"></div>
-                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Velvet Engine</h3>
-                                <div class="card-meta-container"><div class="card-meta"><span>92% Match</span> 2024</div></div>
-                                <div class="card-controls"><button class="btn-play"></button></div>
-                            </div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-wrapper" style="--i: 3;">
-                    <div class="card-intro-animator">
-                        <div class="content-card">
-                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=1600&auto=format&fit=crop');"></div>
-                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Neon Blood</h3>
-                                <div class="card-meta-container"><div class="card-meta"><span>89% Match</span> 2023</div></div>
-                                <div class="card-controls"><button class="btn-play"></button></div>
-                            </div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-wrapper" style="--i: 4;">
-                    <div class="card-intro-animator">
-                        <div class="content-card">
-                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600&auto=format&fit=crop');"></div>
-                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Eclipse</h3>
-                                <div class="card-meta-container"><div class="card-meta"><span>94% Match</span> 2024</div></div>
-                                <div class="card-controls"><button class="btn-play"></button></div>
-                            </div></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card-wrapper" style="--i: 5;">
-                    <div class="card-intro-animator">
-                        <div class="content-card">
-                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1598387993441-a364f854c3e1?q=80&w=1600&auto=format&fit=crop');"></div>
-                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Final Act</h3>
-                                <div class="card-meta-container"><div class="card-meta"><span>99% Match</span> 2024</div></div>
-                                <div class="card-controls"><button class="btn-play"></button></div>
-                            </div></div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
-    </div>
 
-    <!-- SAKA VIDEO PLAYER MODAL -->
-    <div id="video-modal" class="video-modal">
-        <!-- Overlay Close Button -->
-        <button class="btn-close-modal" id="close-modal">&times;</button>
-        
-        <div class="saka-player-container" id="saka-container">
-            <div id="video-loader" class="video-loader-overlay">
-                <div class="video-spinner"></div>
-            </div>
-            
-            <video id="saka-video" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+        <!-- 2.5 COMPANY LOGO SCREEN (Phase 2.5) -->
+        <div id="logo-screen">
+            <img src="https://cgasansol.github.io/adminportal/company_logo.png" class="company-logo-img" id="company-logo" alt="Company Logo">
         </div>
-    </div>
+
+        <!-- 3. INTRO SECTION (Phase 3 - "Created by...") -->
+        <div id="intro-section">
+            <div class="bar bar-top"></div>
+            <div class="bar bar-bottom"></div>
+            <!-- Font size updated to container queries (cqw) for perfect scaling -->
+            <div class="logo-text">Created by GOURAB LAYAK</div>
+        </div>
+
+        <!-- 3.5 RANDOM LOADING SCREEN (Phase 4) -->
+        <div id="random-loader">
+            <div class="video-spinner"></div>
+        </div>
+
+        <!-- 4. BLACK TRANSITION SCREEN -->
+        <div id="black-transition"></div>
+
+        <!-- Animated Backgrounds -->
+        <div class="cinematic-bg"></div><div class="cinematic-bg-overlay"></div><div class="ambient-glow"></div>
+
+        <!-- 5. MAIN APP (Phase 5) -->
+        <div id="main-app">
+            <header>
+                <div class="header-logo">CINE<span>BOX</span></div>
+                <div class="header-title" style="text-transform: none;">Created by GOURAB LAYAK</div>
+            </header>
+
+            <div class="slider-container">
+                <div class="video-track" id="video-track">
+                    
+                    <div class="card-wrapper" style="--i: 0;">
+                        <div class="card-intro-animator">
+                            <div class="content-card">
+                                <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1571243545084-7ca0bd0a7a3b?q=80&w=1600&auto=format&fit=crop');"></div>
+                                <div class="card-overlay"><div class="card-content"><h3 class="card-title">Crimson Night</h3>
+                                    <div class="card-meta-container"><div class="card-meta"><span>98% Match</span> 2024</div></div>
+                                    <div class="card-controls"><button class="btn-play"></button></div>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-wrapper" style="--i: 1;">
+                        <div class="card-intro-animator">
+                            <div class="content-card">
+                                <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1493225457124-a1a2a5956093?q=80&w=1600&auto=format&fit=crop');"></div>
+                                <div class="card-overlay"><div class="card-content"><h3 class="card-title">Shadow Walk</h3>
+                                    <div class="card-meta-container"><div class="card-meta"><span>95% Match</span> 2023</div></div>
+                                    <div class="card-controls"><button class="btn-play"></button></div>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-wrapper" style="--i: 2;">
+                        <div class="card-intro-animator">
+                            <div class="content-card">
+                                <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=1600&auto=format&fit=crop');"></div>
+                                <div class="card-overlay"><div class="card-content"><h3 class="card-title">Velvet Engine</h3>
+                                    <div class="card-meta-container"><div class="card-meta"><span>92% Match</span> 2024</div></div>
+                                    <div class="card-controls"><button class="btn-play"></button></div>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-wrapper" style="--i: 3;">
+                        <div class="card-intro-animator">
+                            <div class="content-card">
+                                <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=1600&auto=format&fit=crop');"></div>
+                                <div class="card-overlay"><div class="card-content"><h3 class="card-title">Neon Blood</h3>
+                                    <div class="card-meta-container"><div class="card-meta"><span>89% Match</span> 2023</div></div>
+                                    <div class="card-controls"><button class="btn-play"></button></div>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-wrapper" style="--i: 4;">
+                        <div class="card-intro-animator">
+                            <div class="content-card">
+                                <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600&auto=format&fit=crop');"></div>
+                                <div class="card-overlay"><div class="card-content"><h3 class="card-title">Eclipse</h3>
+                                    <div class="card-meta-container"><div class="card-meta"><span>94% Match</span> 2024</div></div>
+                                    <div class="card-controls"><button class="btn-play"></button></div>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-wrapper" style="--i: 5;">
+                        <div class="card-intro-animator">
+                            <div class="content-card">
+                                <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1598387993441-a364f854c3e1?q=80&w=1600&auto=format&fit=crop');"></div>
+                                <div class="card-overlay"><div class="card-content"><h3 class="card-title">Final Act</h3>
+                                    <div class="card-meta-container"><div class="card-meta"><span>99% Match</span> 2024</div></div>
+                                    <div class="card-controls"><button class="btn-play"></button></div>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- SAKA VIDEO PLAYER MODAL -->
+        <div id="video-modal" class="video-modal">
+            <button class="btn-close-modal" id="close-modal">&times;</button>
+            <div class="saka-player-container" id="saka-container">
+                <div id="video-loader" class="video-loader-overlay">
+                    <div class="video-spinner"></div>
+                </div>
+                <video id="saka-video" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+            </div>
+        </div>
+
+    </div> <!-- End App Container -->
 
     <script>
         // ================= WWE STYLE BOO-BASS SOUND =================
@@ -559,11 +586,20 @@
             noise.start(time); osc.start(time); noise.stop(time + 0.8); osc.stop(time + 0.8);
         }
 
-        // ================= 🚨 EPIC TIMELINE: PERFECT CINEMATIC LOAD SEQUENCE 🚨 =================
+        // ================= 🚨 TIMELINE WITH ORIENTATION LOCK 🚨 =================
         let isAnimatingEntry = true; 
         let currentActiveIndex = 0; 
+        let hasTimelineStarted = false; // Prevent running timeline multiple times
         
-        window.addEventListener('load', () => {
+        function startCinematicSequence() {
+            // Check if mobile device is in portrait mode
+            if (window.innerWidth <= 900 && window.innerHeight > window.innerWidth) {
+                return; // DO NOT start the sequence, wait for rotation
+            }
+
+            if (hasTimelineStarted) return;
+            hasTimelineStarted = true;
+
             preInitAudio(); 
             
             const initialSpinner = document.getElementById('initial-spinner-screen');
@@ -578,9 +614,7 @@
 
             // Phase 1: Pure Black Screen + Bottom Right Spinner (6 Seconds)
             setTimeout(() => {
-                initialSpinner.style.opacity = '0'; // Fade out spinner
-                
-                // Start Disclaimer Animation exactly when black screen fades out
+                initialSpinner.style.opacity = '0';
                 disclaimerText.classList.add('active');
                 
                 // Phase 2: DISCLAIMER text appears (Duration: 6 seconds)
@@ -588,92 +622,92 @@
                     initialSpinner.style.display = 'none';
                     
                     setTimeout(() => {
-                        preloader.style.opacity = '0'; // Fade out Disclaimer Wrapper
+                        preloader.style.opacity = '0';
                         
-                        // Phase 2.5: COMPANY LOGO SCREEN (Duration: 3 seconds stay + 1s fade)
+                        // Phase 2.5: COMPANY LOGO SCREEN (Duration: 3s stay + 1s fade)
                         setTimeout(() => {
                             preloader.style.display = 'none';
                             
                             logoScreen.style.display = 'flex';
-                            companyLogo.classList.add('animate-zoom'); // Add cinematic zoom
-                            
-                            // Fade in logo
+                            companyLogo.classList.add('animate-zoom');
                             setTimeout(() => { logoScreen.style.opacity = '1'; }, 50);
                             
-                            // Keep logo for 3 seconds
                             setTimeout(() => {
-                                logoScreen.style.opacity = '0'; // Fade out logo
+                                logoScreen.style.opacity = '0';
                                 
-                                // Phase 3: "Created by GOURAB LAYAK" Intro (Duration: 4 seconds)
+                                // Phase 3: Intro (Duration: 4 seconds)
                                 setTimeout(() => {
                                     logoScreen.style.display = 'none';
-                                    
-                                    document.body.classList.add('page-loaded'); // Trigger bar split & text shine
+                                    document.body.classList.add('page-loaded'); 
                                     
                                     setTimeout(() => {
-                                        intro.style.opacity = '0'; // Fade out Intro
+                                        intro.style.opacity = '0';
                                         
-                                        // Phase 4: RANDOM LOADING SCREEN USING YOUR IMAGE SPINNER (Duration: 4.5 seconds)
+                                        // Phase 4: RANDOM LOADING SCREEN (Duration: 4.5 seconds)
                                         setTimeout(() => {
                                             intro.style.display = 'none';
                                             randomLoader.style.display = 'block'; 
-                                            
-                                            // Trigger fade in for random loader
                                             setTimeout(() => { randomLoader.style.opacity = '1'; }, 50);
                                             
-                                            // Keep random loader for 4.5 seconds
                                             setTimeout(() => {
-                                                randomLoader.style.opacity = '0'; // Fade it out
+                                                randomLoader.style.opacity = '0';
                                                 
                                                 // Phase 5: BOOM! Main UI Appears
                                                 setTimeout(() => {
                                                     randomLoader.style.display = 'none';
-                                                    
-                                                    blackTransition.style.opacity = '0'; // Fade out the final black curtain
+                                                    blackTransition.style.opacity = '0'; 
                                                     mainApp.classList.add('show-app');
                                                     currentActiveIndex = getCenterCardIndex(); 
                                                     
                                                     const track = document.getElementById('video-track');
-                                                    track.classList.add('run-intro'); // Cards fly in
+                                                    track.classList.add('run-intro'); 
                                                     updateCarousel3D(); 
 
-                                                    // Unlock UI when animations finish
                                                     setTimeout(() => { 
                                                         isAnimatingEntry = false; 
                                                         blackTransition.style.display = 'none';
                                                     }, 5500);
 
-                                                }, 1000); // 1s for random loader to fade out
+                                                }, 1000);
 
-                                            }, 4500); // 4.5s duration for random loading screen
+                                            }, 4500);
 
-                                        }, 1000); // 1s for intro to fade out
+                                        }, 1000);
 
-                                    }, 4000); // 4s for intro text to shine
+                                    }, 4000);
                                     
-                                }, 1000); // 1s wait for Logo fade out
+                                }, 1000);
                                 
-                            }, 3000); // 3s stay for Logo
+                            }, 3000);
                             
-                        }, 1000); // 1s for Disclaimer Wrapper to fade out
+                        }, 1000);
 
-                    }, 6000); // 6s duration for Disclaimer to stay on screen
+                    }, 6000);
 
-                }, 1000); // 1s for Initial Spinner to fade out
+                }, 1000);
 
-            }, 6000); // 6s duration for Initial Spinner
+            }, 6000);
+        }
+
+        // Initialize sequence on Load, Resize, or Orientation Change
+        window.addEventListener('load', startCinematicSequence);
+        window.addEventListener('resize', startCinematicSequence);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(startCinematicSequence, 500); // Small delay for screen to adjust
         });
 
-        // ================= 3D ANIMATION MATH =================
+        // ================= 3D ANIMATION MATH (UPDATED FOR 16:9 CONTAINER) =================
+        const appContainer = document.getElementById('app-container');
         const slider = document.getElementById('video-track');
         const wrappers = document.querySelectorAll('.card-wrapper');
 
         const getCenterCardIndex = () => {
             let minDistance = Infinity; let centerIndex = 0;
-            const screenCenter = window.innerWidth / 2;
+            // Now checking center based on appContainer, NOT the whole screen
+            const screenCenter = appContainer.offsetWidth / 2;
             wrappers.forEach((wrapper, index) => {
                 const rect = wrapper.getBoundingClientRect();
-                const wrapperCenter = rect.left + rect.width / 2;
+                const wrapperCenter = (rect.left - appContainer.getBoundingClientRect().left) + rect.width / 2;
                 const distance = Math.abs(screenCenter - wrapperCenter);
                 if (distance < minDistance) { minDistance = distance; centerIndex = index; }
             });
@@ -681,8 +715,8 @@
         };
 
         function updateCarousel3D() {
-            const screenCenter = window.innerWidth / 2;
-            const maxDistance = window.innerWidth * 1.1; 
+            const screenCenter = appContainer.offsetWidth / 2;
+            const maxDistance = appContainer.offsetWidth * 1.1; 
             
             const newCenterIndex = getCenterCardIndex();
             if (newCenterIndex !== currentActiveIndex && !isAnimatingEntry) {
@@ -692,7 +726,7 @@
 
             wrappers.forEach(wrapper => {
                 const rect = wrapper.getBoundingClientRect();
-                const wrapperCenter = rect.left + rect.width / 2;
+                const wrapperCenter = (rect.left - appContainer.getBoundingClientRect().left) + rect.width / 2;
                 const offset = wrapperCenter - screenCenter;
                 const distance = Math.abs(offset);
                 
@@ -744,7 +778,7 @@
         const scrollToCardIndex = (index) => {
             if (index < 0 || index >= wrappers.length) return;
             const targetCard = wrappers[index];
-            const targetScroll = targetCard.offsetLeft - ((window.innerWidth - targetCard.offsetWidth) / 2);
+            const targetScroll = targetCard.offsetLeft - ((appContainer.offsetWidth - targetCard.offsetWidth) / 2);
             slider.style.scrollSnapType = 'none'; 
             slider.scrollTo({ left: targetScroll, behavior: 'smooth' });
             clearTimeout(snapTimeout);
