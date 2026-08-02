@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinebox - Epic Flying Carpet Intro</title>
+    
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================= GLOBAL SETTINGS ================= */
+        :root {
+            --bg-color: #030000; 
+            --accent-color: #E50914; 
+            --accent-glow: rgba(229, 9, 20, 0.6);
+            --text-main: #ffffff;
+            --font-logo: 'Cinzel', serif;
+            --font-main: 'Montserrat', sans-serif;
+            --card-width: 640px;
+            --card-height: 360px; 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-color); color: var(--text-main); font-family: var(--font-main);
+            overflow: hidden; width: 100vw; height: 100vh;
+            perspective: 2500px; 
+        }
+
+        /* ================= GLOBAL BOTTOM-RIGHT SPINNER ================= */
+        .video-spinner {
+            position: absolute; bottom: 50px; right: 50px; 
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-top: 3px solid #ffffff; border-radius: 50%;
+            animation: spinLoader 1s linear infinite;
+        }
+        @keyframes spinLoader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ================= 1. INITIAL SPINNER OVERLAY (Phase 1) ================= */
+        #initial-spinner-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 9999999; 
+            display: block; opacity: 1; transition: opacity 1s ease;
+        }
+
+        /* ================= 🚨 2. PRELOADER (ANIMATED DISCLAIMER) (Phase 2) 🚨 ================= */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 999999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+        
+        .disclaimer-text {
+            font-family: var(--font-main); font-size: 1.1rem; line-height: 1.8; letter-spacing: 2px;
+            color: rgba(255, 255, 255, 0.85); text-align: center; max-width: 800px; padding: 0 20px;
+            opacity: 0; transform: translateY(30px);
+        }
+        
+        .disclaimer-text.active {
+            animation: fadeInOutDisclaimer 6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        
+        /* 🚨 NEW: Red Animated Box for Heading 🚨 */
+        .disclaimer-text strong.main-title {
+            font-size: 1.6rem; color: #ffffff; letter-spacing: 8px; margin-bottom: 25px; 
+            display: inline-block; padding: 12px 40px; border-radius: 8px;
+            border: 1px solid rgba(229, 9, 20, 0.6);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8); /* Ensures text is always sharp */
+            animation: pulseDisclaimerBox 2s infinite alternate; /* Background fading animation */
+        }
+
+        /* 🚨 Keyframes for fading only the box background, NOT the text 🚨 */
+        @keyframes pulseDisclaimerBox {
+            0% { 
+                background-color: rgba(100, 0, 0, 0.2); 
+                box-shadow: 0 0 10px rgba(229, 9, 20, 0.1); 
+            }
+            100% { 
+                background-color: rgba(229, 9, 20, 0.85); /* Dark Red matching UI */
+                box-shadow: 0 0 40px rgba(229, 9, 20, 0.7), inset 0 0 15px rgba(255,255,255,0.1); 
+            }
+        }
+
+        .disclaimer-details {
+            font-size: 0.95rem; color: #cccccc; margin-top: 30px; padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15); line-height: 2; letter-spacing: 1.5px;
+        }
+        .disclaimer-details b {
+            color: #ffffff; font-weight: 600; letter-spacing: 2px;
+        }
+
+        /* Slide up and fade in animation for the whole disclaimer container */
+        @keyframes fadeInOutDisclaimer {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); filter: blur(10px); }
+            15% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+            85% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+            100% { opacity: 0; transform: scale(1.05) translateY(-20px); filter: blur(10px); }
+        }
+
+        /* ================= 2.5. COMPANY LOGO SCREEN (Phase 2.5) ================= */
+        #logo-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 999998; 
+            display: none; justify-content: center; align-items: center;
+            opacity: 0; transition: opacity 1s ease;
+        }
+        .company-logo-img {
+            max-width: 350px; width: 60vw;
+            filter: drop-shadow(0 0 25px rgba(255, 255, 255, 0.15));
+        }
+        .company-logo-img.animate-zoom {
+            animation: logoZoom 4s linear forwards;
+        }
+        @keyframes logoZoom {
+            0% { transform: scale(0.95); }
+            100% { transform: scale(1.05); }
+        }
+
+        /* ================= 3. INTRO SCREEN (Phase 3) ================= */
+        #intro-section {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 100; background: transparent; transition: opacity 1s ease 0.5s, visibility 1s ease 0.5s;
+        }
+        .bar { position: absolute; left: 0; width: 100%; height: 50vh; background: #000; z-index: 105; transition: transform 2.5s cubic-bezier(0.8, 0, 0.2, 1); }
+        .bar-top { top: 0; } .bar-bottom { bottom: 0; }
+        .page-loaded .bar-top { transform: translateY(-100%); } .page-loaded .bar-bottom { transform: translateY(100%); }
+
+        .logo-text {
+            font-family: var(--font-main); font-weight: 500; letter-spacing: 0.25em; margin-right: -0.25em;
+            color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, 0.6);
+            background-image: linear-gradient(-45deg, #777777 35%, #ffffff 48%, #f0f0f0 52%, #ffffff 56%, #777777 65%);
+            background-size: 300% auto; background-position: 150% center; -webkit-background-clip: text;
+            filter: blur(10px); opacity: 0; z-index: 110;
+        }
+        .page-loaded .logo-text {
+            animation: blurReveal 2s ease-out 0.5s forwards, lightSweep 2s cubic-bezier(0.4, 0, 0.2, 1) 2s forwards, continuousZoom 4s linear forwards;
+        }
+
+        /* ================= 3.5. RANDOM LOADING SCREEN (Phase 4) ================= */
+        #random-loader {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 95; 
+            display: none; opacity: 0; transition: opacity 1s ease;
+        }
+
+        /* ================= 4. BLACK TRANSITION OVERLAY ================= */
+        #black-transition {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000000; z-index: 90;
+            opacity: 1; transition: opacity 1.5s ease; pointer-events: none;
+        }
+
+        /* ================= AMBIENT STUDIO BACKGROUND ================= */
+        .cinematic-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(45deg, #050000, #2b0206, #0a0002, #3a0309);
+            background-size: 400% 400%; opacity: 0; 
+            animation: bgFadeIn 2s ease-in-out forwards, gradientShift 15s ease infinite; z-index: -3;
+        }
+
+        .cinematic-bg-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 15%, #000000 90%);
+            z-index: -2; pointer-events: none;
+        }
+
+        .ambient-glow {
+            position: fixed; top: 55%; left: 50%; transform: translate(-50%, -50%);
+            width: 70vw; height: 50vh;
+            background: radial-gradient(ellipse at center, rgba(229,9,20,0.15) 0%, transparent 65%);
+            z-index: -1; pointer-events: none;
+            animation: pulseAmbient 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes pulseAmbient { 0% { transform: translate(-50%, -50%) scale(0.85); opacity: 0.5; } 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } }
+
+        /* ================= HEADER ================= */
+        #main-app {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.5s ease;
+        }
+        #main-app.show-app { opacity: 1; visibility: visible; }
+
+        header {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 40px 60px;
+            display: flex; justify-content: space-between; align-items: center; z-index: 20;
+            opacity: 0; transform: translateY(-30px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #main-app.show-app header { opacity: 1; transform: translateY(0); }
+
+        .header-logo { font-family: var(--font-logo); font-size: 2rem; letter-spacing: 3px; }
+        .header-logo span { color: var(--accent-color); text-shadow: 0 0 20px var(--accent-glow); }
+        .header-title { font-size: 1.1rem; letter-spacing: 6px; text-transform: none; color: rgba(255,255,255,0.6); }
+
+        /* ================= 3D SLIDER & PERFECT MIRROR ================= */
+        .slider-container { width: 100%; height: 100vh; display: flex; align-items: center; perspective: 3000px; position: relative; }
+
+        .video-track {
+            display: flex; gap: 0px; width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; 
+            padding: 180px calc(50vw - (var(--card-width) / 2)) 200px calc(50vw - (var(--card-width) / 2));
+            -ms-overflow-style: none; scrollbar-width: none; cursor: grab; transform-style: preserve-3d;
+        }
+        .video-track::-webkit-scrollbar { display: none; }
+        .video-track.active { cursor: grabbing; scroll-snap-type: none; }
+        .video-track.active .content-card { pointer-events: none; }
+
+        .card-wrapper {
+            min-width: var(--card-width); height: var(--card-height); flex-shrink: 0;
+            scroll-snap-align: center; display: flex; justify-content: center; align-items: center;
+            position: relative; transform-style: preserve-3d;
+        }
+
+        /* ================= 🚨 EPIC CSS 3D FLYING ANIMATION 🚨 ================= */
+        .card-intro-animator {
+            width: 100%; height: 100%; transform-style: preserve-3d;
+            transform: translate3d(-100vw, 100vh, -3000px) rotateX(1080deg) rotateY(720deg) scale(0.1);
+            opacity: 0;
+        }
+
+        .run-intro .card-intro-animator {
+            animation: magicCarpetFly 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation-delay: calc(var(--i) * 0.3s); 
+        }
+
+        @keyframes magicCarpetFly {
+            0% { transform: translate3d(-100vw, 80vh, -3000px) rotateX(1080deg) rotateY(720deg) scale(0.1); opacity: 0; }
+            30% { transform: translate3d(-50vw, -50vh, -1500px) rotateX(720deg) rotateY(360deg) scale(0.4); opacity: 0.5; }
+            60% { transform: translate3d(50vw, -40vh, -800px) rotateX(360deg) rotateY(180deg) scale(0.7); opacity: 0.8; }
+            100% { transform: translate3d(0, 0, 0) rotateX(0) rotateY(0) scale(1); opacity: 1; }
+        }
+
+        /* ================= STYLISH MASSIVE 3D CARD ================= */
+        .content-card {
+            width: 100%; height: 100%; border-radius: 16px; position: relative; background-color: #000;
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease, box-shadow 0.6s ease;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.9); border: 1px solid rgba(255,255,255,0.1); 
+            border-top: 1px solid rgba(255,255,255,0.25); 
+            user-select: none; cursor: pointer; 
+            will-change: transform, opacity; transform: translate3d(0, 0, 0); 
+            -webkit-box-reflect: below 15px linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0,0,0,0.1) 40%, rgba(255,255,255,0.5) 100%);
+        }
+
+        .card-bg {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 15px;
+            background-size: cover; background-position: center; overflow: hidden;
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s ease; filter: brightness(0.4) contrast(1.1);
+        }
+
+        .card-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 15px;
+            background: linear-gradient(to top, rgba(5, 0, 2, 0.95) 0%, rgba(5, 0, 2, 0.6) 40%, transparent 60%);
+            opacity: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 40px;
+            transition: opacity 0.5s ease;
+        }
+        .card-content { transform: translateY(20px); opacity: 0; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.5s ease; }
+
+        .card-title { font-size: 2.8rem; font-weight: 700; margin-bottom: 15px; text-shadow: 0 5px 20px rgba(0,0,0,1); letter-spacing: 1.5px;}
+        .card-meta-container { margin-bottom: 25px; }
+        
+        .card-meta { 
+            display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.05); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15); 
+            border-radius: 30px; padding: 8px 18px; font-size: 0.9rem; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .card-meta span { color: var(--accent-color); font-weight: 700; text-shadow: 0 0 10px rgba(229,9,20,0.4);}
+
+        .btn-play {
+            width: 60px; height: 60px; border-radius: 50%; background-color: var(--accent-color); border: none;
+            display: flex; justify-content: center; align-items: center; cursor: pointer;
+            box-shadow: 0 0 25px var(--accent-glow); transition: transform 0.2s, background-color 0.2s; pointer-events: auto;
+        }
+        .btn-play::after {
+            content: ''; border-style: solid; border-width: 9px 0 9px 16px;
+            border-color: transparent transparent transparent #ffffff; margin-left: 6px;
+        }
+        .btn-play:hover { transform: scale(1.15); background-color: #ff0f1f; }
+
+        /* ================= ACTIVE CENTER CARD ================= */
+        .content-card.active-card {
+            border: 1px solid rgba(229, 9, 20, 0.8);
+            border-top: 1px solid rgba(255, 150, 150, 0.5); 
+            box-shadow: 0 50px 100px rgba(0,0,0,1), 0 0 60px rgba(229, 9, 20, 0.5), inset 0 0 40px rgba(229, 9, 20, 0.3);
+            -webkit-box-reflect: below 20px linear-gradient(to bottom, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.2) 70%, transparent 100%);
+        }
+        .content-card.active-card .card-bg { filter: brightness(1) contrast(1.15); transform: scale(1.05); }
+        .content-card.active-card .card-overlay { opacity: 1; }
+        .content-card.active-card .card-content { transform: translateY(0); opacity: 1; }
+        .content-card.active-card .btn-play { animation: pulseGlow 2s infinite; }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 15px rgba(229,9,20,0.5); }
+            50% { box-shadow: 0 0 40px rgba(229,9,20,0.9), 0 0 20px rgba(229,9,20,0.5) inset; transform: scale(1.05); }
+            100% { box-shadow: 0 0 15px rgba(229,9,20,0.5); }
+        }
+
+        @keyframes bgFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes blurReveal { 0% { opacity: 0; filter: blur(20px); } 100% { opacity: 1; filter: blur(0px); } }
+        
+        @keyframes lightSweep { 
+            0% { background-position: 150% center; } 
+            50% { filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.8)); } 
+            100% { background-position: -50% center; filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.5)); } 
+        }
+        
+        @keyframes continuousZoom { 0% { transform: scale(0.95); } 100% { transform: scale(1.05); } }
+
+        @media (max-width: 768px) {
+            :root { --card-width: 340px; --card-height: 191px; }
+            header { padding: 20px; flex-direction: column; gap: 5px; }
+            .card-title { font-size: 1.8rem; }
+            .btn-play { width: 50px; height: 50px; }
+            .btn-play::after { border-width: 7px 0 7px 12px; margin-left: 5px; }
+        }
+        
+        /* ================= SAKA VIDEO PLAYER (MODAL) ================= */
+        .video-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000;
+            z-index: 9999; display: flex; justify-content: center; align-items: center;
+            opacity: 0; visibility: hidden; pointer-events: none;
+            transition: opacity 1.2s ease, visibility 1.2s ease;
+        }
+        .video-modal.show { opacity: 1; visibility: visible; pointer-events: auto; }
+
+        /* Overlay Close Button */
+        .btn-close-modal {
+            position: absolute; top: 30px; right: 40px; font-size: 2.5rem; color: #fff;
+            background: rgba(0, 0, 0, 0.4); border-radius: 50%;
+            width: 50px; height: 50px; display: flex; justify-content: center; align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer; z-index: 10002;
+            transition: background 0.3s, transform 0.3s, border 0.3s;
+        }
+        .btn-close-modal:hover { background: var(--accent-color); transform: scale(1.1) rotate(90deg); border-color: transparent; }
+
+        /* Edge-to-Edge Container */
+        .saka-player-container {
+            width: 100vw; height: 100vh;
+            background-color: #000; overflow: hidden;
+            position: relative;
+            
+            /* Opening scale */
+            transform: scale(0.85); opacity: 0; 
+            transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.5s ease;
+        }
+        .video-modal.show .saka-player-container { transform: scale(1); opacity: 1; }
+
+        /* CLOSING ANIMATION */
+        .video-modal.closing .saka-player-container {
+            transform: scale(0.3) translateX(-150vw); opacity: 0;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s ease;
+        }
+
+        #saka-video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+        
+        /* ================= VIDEO LOADING SPINNER OVERLAY ================= */
+        .video-loader-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000000; 
+            z-index: 5000; display: block; opacity: 1; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .video-loader-overlay.hidden { opacity: 0; }
+
+    </style>
+</head>
+<body>
+
+    <!-- 1. INITIAL SPINNER OVERLAY (Phase 1) -->
+    <div id="initial-spinner-screen">
+        <div class="video-spinner"></div>
+    </div>
+
+    <!-- 2. PRELOADER (ANIMATED DISCLAIMER) -->
+    <div id="preloader">
+        <div class="disclaimer-text" id="disclaimer-text">
+            <!-- 🚨 Red Pulsating Box for Heading 🚨 -->
+            <strong class="main-title">DISCLAIMER</strong><br>
+            
+            This webpage is a concept design created for demonstration and educational purposes.<br>
+            All video content and images are placeholders and do not represent actual commercial products.
+            
+            <div class="disclaimer-details">
+                <b>Created By:</b> GOURAB LAYAK<br>
+                <b>Company:</b> Nexus Infotech Pvt. Ltd.<br>
+                <b>Address:</b> Kashi H, Kalna, Asansol, Paschim Bardhaman, 713340
+            </div>
+        </div>
+    </div>
+
+    <!-- 2.5 COMPANY LOGO SCREEN (Phase 2.5) -->
+    <div id="logo-screen">
+        <img src="https://cgasansol.github.io/adminportal/company_logo.png" class="company-logo-img" id="company-logo" alt="Company Logo">
+    </div>
+
+    <!-- 3. INTRO SECTION (Phase 3 - "Created by...") -->
+    <div id="intro-section">
+        <div class="bar bar-top"></div>
+        <div class="bar bar-bottom"></div>
+        <div class="logo-text" style="font-size: 3.5vw;">Created by GOURAB LAYAK</div>
+    </div>
+
+    <!-- 3.5 RANDOM LOADING SCREEN (Phase 4) -->
+    <div id="random-loader">
+        <div class="video-spinner"></div>
+    </div>
+
+    <!-- 4. BLACK TRANSITION SCREEN (Curtain before Main App) -->
+    <div id="black-transition"></div>
+
+    <!-- Animated Backgrounds (Hidden behind Black Transition initially) -->
+    <div class="cinematic-bg"></div><div class="cinematic-bg-overlay"></div><div class="ambient-glow"></div>
+
+    <!-- 5. MAIN APP (Phase 5) -->
+    <div id="main-app">
+        <header>
+            <div class="header-logo">CINE<span>BOX</span></div>
+            <div class="header-title" style="text-transform: none;">Created by GOURAB LAYAK</div>
+        </header>
+
+        <div class="slider-container">
+            <div class="video-track" id="video-track">
+                
+                <div class="card-wrapper" style="--i: 0;">
+                    <div class="card-intro-animator">
+                        <div class="content-card">
+                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1571243545084-7ca0bd0a7a3b?q=80&w=1600&auto=format&fit=crop');"></div>
+                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Crimson Night</h3>
+                                <div class="card-meta-container"><div class="card-meta"><span>98% Match</span> 2024</div></div>
+                                <div class="card-controls"><button class="btn-play"></button></div>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-wrapper" style="--i: 1;">
+                    <div class="card-intro-animator">
+                        <div class="content-card">
+                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1493225457124-a1a2a5956093?q=80&w=1600&auto=format&fit=crop');"></div>
+                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Shadow Walk</h3>
+                                <div class="card-meta-container"><div class="card-meta"><span>95% Match</span> 2023</div></div>
+                                <div class="card-controls"><button class="btn-play"></button></div>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-wrapper" style="--i: 2;">
+                    <div class="card-intro-animator">
+                        <div class="content-card">
+                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1549880181-56a44cf4a9a1?q=80&w=1600&auto=format&fit=crop');"></div>
+                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Velvet Engine</h3>
+                                <div class="card-meta-container"><div class="card-meta"><span>92% Match</span> 2024</div></div>
+                                <div class="card-controls"><button class="btn-play"></button></div>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-wrapper" style="--i: 3;">
+                    <div class="card-intro-animator">
+                        <div class="content-card">
+                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?q=80&w=1600&auto=format&fit=crop');"></div>
+                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Neon Blood</h3>
+                                <div class="card-meta-container"><div class="card-meta"><span>89% Match</span> 2023</div></div>
+                                <div class="card-controls"><button class="btn-play"></button></div>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-wrapper" style="--i: 4;">
+                    <div class="card-intro-animator">
+                        <div class="content-card">
+                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?q=80&w=1600&auto=format&fit=crop');"></div>
+                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Eclipse</h3>
+                                <div class="card-meta-container"><div class="card-meta"><span>94% Match</span> 2024</div></div>
+                                <div class="card-controls"><button class="btn-play"></button></div>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-wrapper" style="--i: 5;">
+                    <div class="card-intro-animator">
+                        <div class="content-card">
+                            <div class="card-bg" style="background-image: url('https://images.unsplash.com/photo-1598387993441-a364f854c3e1?q=80&w=1600&auto=format&fit=crop');"></div>
+                            <div class="card-overlay"><div class="card-content"><h3 class="card-title">Final Act</h3>
+                                <div class="card-meta-container"><div class="card-meta"><span>99% Match</span> 2024</div></div>
+                                <div class="card-controls"><button class="btn-play"></button></div>
+                            </div></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- SAKA VIDEO PLAYER MODAL -->
+    <div id="video-modal" class="video-modal">
+        <!-- Overlay Close Button -->
+        <button class="btn-close-modal" id="close-modal">&times;</button>
+        
+        <div class="saka-player-container" id="saka-container">
+            <div id="video-loader" class="video-loader-overlay">
+                <div class="video-spinner"></div>
+            </div>
+            
+            <video id="saka-video" src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+        </div>
+    </div>
+
+    <script>
+        // ================= WWE STYLE BOO-BASS SOUND =================
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx; 
+
+        function preInitAudio() { if (!audioCtx) audioCtx = new AudioContext(); }
+
+        function playCinematicWhoosh() {
+            if (!audioCtx) return;
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => console.log('Audio blocked till user clicks.'));
+                return; 
+            }
+            
+            const time = audioCtx.currentTime;
+            const bufferSize = audioCtx.sampleRate * 0.8;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1; 
+            
+            const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+            const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'bandpass';
+            noiseFilter.frequency.setValueAtTime(80, time);
+            noiseFilter.frequency.exponentialRampToValueAtTime(600, time + 0.15); 
+            noiseFilter.frequency.exponentialRampToValueAtTime(80, time + 0.6);   
+
+            const osc = audioCtx.createOscillator(); osc.type = 'sine'; 
+            osc.frequency.setValueAtTime(100, time); osc.frequency.exponentialRampToValueAtTime(25, time + 0.6); 
+
+            const masterGain = audioCtx.createGain(); masterGain.gain.setValueAtTime(0, time);
+            masterGain.gain.linearRampToValueAtTime(0.35, time + 0.03); masterGain.gain.exponentialRampToValueAtTime(0.01, time + 0.8); 
+
+            noise.connect(noiseFilter); noiseFilter.connect(masterGain);
+            osc.connect(masterGain); masterGain.connect(audioCtx.destination);
+            noise.start(time); osc.start(time); noise.stop(time + 0.8); osc.stop(time + 0.8);
+        }
+
+        // ================= 🚨 EPIC TIMELINE: PERFECT CINEMATIC LOAD SEQUENCE 🚨 =================
+        let isAnimatingEntry = true; 
+        let currentActiveIndex = 0; 
+        
+        window.addEventListener('load', () => {
+            preInitAudio(); 
+            
+            const initialSpinner = document.getElementById('initial-spinner-screen');
+            const preloader = document.getElementById('preloader');
+            const disclaimerText = document.getElementById('disclaimer-text');
+            const logoScreen = document.getElementById('logo-screen');
+            const companyLogo = document.getElementById('company-logo');
+            const intro = document.getElementById('intro-section');
+            const randomLoader = document.getElementById('random-loader');
+            const mainApp = document.getElementById('main-app');
+            const blackTransition = document.getElementById('black-transition');
+
+            // Phase 1: Pure Black Screen + Bottom Right Spinner (6 Seconds)
+            setTimeout(() => {
+                initialSpinner.style.opacity = '0'; // Fade out spinner
+                
+                // Start Disclaimer Animation exactly when black screen fades out
+                disclaimerText.classList.add('active');
+                
+                // Phase 2: DISCLAIMER text appears (Duration: 6 seconds)
+                setTimeout(() => {
+                    initialSpinner.style.display = 'none';
+                    
+                    setTimeout(() => {
+                        preloader.style.opacity = '0'; // Fade out Disclaimer Wrapper
+                        
+                        // Phase 2.5: COMPANY LOGO SCREEN (Duration: 3 seconds stay + 1s fade)
+                        setTimeout(() => {
+                            preloader.style.display = 'none';
+                            
+                            logoScreen.style.display = 'flex';
+                            companyLogo.classList.add('animate-zoom'); // Add cinematic zoom
+                            
+                            // Fade in logo
+                            setTimeout(() => { logoScreen.style.opacity = '1'; }, 50);
+                            
+                            // Keep logo for 3 seconds
+                            setTimeout(() => {
+                                logoScreen.style.opacity = '0'; // Fade out logo
+                                
+                                // Phase 3: "Created by GOURAB LAYAK" Intro (Duration: 4 seconds)
+                                setTimeout(() => {
+                                    logoScreen.style.display = 'none';
+                                    
+                                    document.body.classList.add('page-loaded'); // Trigger bar split & text shine
+                                    
+                                    setTimeout(() => {
+                                        intro.style.opacity = '0'; // Fade out Intro
+                                        
+                                        // Phase 4: RANDOM LOADING SCREEN USING YOUR IMAGE SPINNER (Duration: 4.5 seconds)
+                                        setTimeout(() => {
+                                            intro.style.display = 'none';
+                                            randomLoader.style.display = 'block'; 
+                                            
+                                            // Trigger fade in for random loader
+                                            setTimeout(() => { randomLoader.style.opacity = '1'; }, 50);
+                                            
+                                            // Keep random loader for 4.5 seconds
+                                            setTimeout(() => {
+                                                randomLoader.style.opacity = '0'; // Fade it out
+                                                
+                                                // Phase 5: BOOM! Main UI Appears
+                                                setTimeout(() => {
+                                                    randomLoader.style.display = 'none';
+                                                    
+                                                    blackTransition.style.opacity = '0'; // Fade out the final black curtain
+                                                    mainApp.classList.add('show-app');
+                                                    currentActiveIndex = getCenterCardIndex(); 
+                                                    
+                                                    const track = document.getElementById('video-track');
+                                                    track.classList.add('run-intro'); // Cards fly in
+                                                    updateCarousel3D(); 
+
+                                                    // Unlock UI when animations finish
+                                                    setTimeout(() => { 
+                                                        isAnimatingEntry = false; 
+                                                        blackTransition.style.display = 'none';
+                                                    }, 5500);
+
+                                                }, 1000); // 1s for random loader to fade out
+
+                                            }, 4500); // 4.5s duration for random loading screen
+
+                                        }, 1000); // 1s for intro to fade out
+
+                                    }, 4000); // 4s for intro text to shine
+                                    
+                                }, 1000); // 1s wait for Logo fade out
+                                
+                            }, 3000); // 3s stay for Logo
+                            
+                        }, 1000); // 1s for Disclaimer Wrapper to fade out
+
+                    }, 6000); // 6s duration for Disclaimer to stay on screen
+
+                }, 1000); // 1s for Initial Spinner to fade out
+
+            }, 6000); // 6s duration for Initial Spinner
+        });
+
+        // ================= 3D ANIMATION MATH =================
+        const slider = document.getElementById('video-track');
+        const wrappers = document.querySelectorAll('.card-wrapper');
+
+        const getCenterCardIndex = () => {
+            let minDistance = Infinity; let centerIndex = 0;
+            const screenCenter = window.innerWidth / 2;
+            wrappers.forEach((wrapper, index) => {
+                const rect = wrapper.getBoundingClientRect();
+                const wrapperCenter = rect.left + rect.width / 2;
+                const distance = Math.abs(screenCenter - wrapperCenter);
+                if (distance < minDistance) { minDistance = distance; centerIndex = index; }
+            });
+            return centerIndex;
+        };
+
+        function updateCarousel3D() {
+            const screenCenter = window.innerWidth / 2;
+            const maxDistance = window.innerWidth * 1.1; 
+            
+            const newCenterIndex = getCenterCardIndex();
+            if (newCenterIndex !== currentActiveIndex && !isAnimatingEntry) {
+                playCinematicWhoosh(); 
+                currentActiveIndex = newCenterIndex;
+            }
+
+            wrappers.forEach(wrapper => {
+                const rect = wrapper.getBoundingClientRect();
+                const wrapperCenter = rect.left + rect.width / 2;
+                const offset = wrapperCenter - screenCenter;
+                const distance = Math.abs(offset);
+                
+                const card = wrapper.querySelector('.content-card');
+                
+                let scale, rotateY, translateZ, opacity, zIndex;
+                if (distance < wrapper.offsetWidth / 1.5) {
+                    card.classList.add('active-card');
+                    scale = 1.15; rotateY = 0; translateZ = 150; opacity = 1; zIndex = 100;
+                } else {
+                    card.classList.remove('active-card');
+                    const direction = offset > 0 ? -1 : 1; 
+                    scale = Math.max(0.75, 1 - (distance / maxDistance));
+                    rotateY = Math.min(Math.abs(distance / 25), 45) * direction; 
+                    translateZ = -150; opacity = Math.max(0.3, 1 - (distance / (maxDistance * 0.6))); zIndex = Math.round(50 - distance / 20);
+                }
+                card.style.transform = `translate3d(0, 0, ${translateZ}px) scale(${scale}) rotateY(${rotateY}deg)`;
+                card.style.opacity = opacity; wrapper.style.zIndex = zIndex; 
+            });
+        }
+
+        let ticking = false;
+        slider.addEventListener('scroll', () => {
+            if (isAnimatingEntry) return; 
+            if (!ticking) { window.requestAnimationFrame(() => { updateCarousel3D(); ticking = false; }); ticking = true; }
+        });
+        window.addEventListener('resize', () => { requestAnimationFrame(updateCarousel3D); });
+
+        // ================= SMART DRAG =================
+        let isDown = false; let isDragging = false; let startX, scrollLeft, mouseDownX; let snapTimeout;
+
+        window.addEventListener('mousedown', preInitAudio); 
+        window.addEventListener('keydown', preInitAudio);
+
+        slider.addEventListener('mousedown', (e) => {
+            if (isAnimatingEntry) return; 
+            isDown = true; isDragging = false; mouseDownX = e.pageX;
+            slider.classList.add('active'); slider.style.scrollSnapType = 'none'; 
+            startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; clearTimeout(snapTimeout);
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown || isAnimatingEntry) return; e.preventDefault(); 
+            if (Math.abs(e.pageX - mouseDownX) > 5) { isDragging = true; }
+            const walk = ((e.pageX - slider.offsetLeft) - startX) * 1.5; 
+            slider.scrollLeft = scrollLeft - walk; updateCarousel3D(); 
+        });
+
+        const scrollToCardIndex = (index) => {
+            if (index < 0 || index >= wrappers.length) return;
+            const targetCard = wrappers[index];
+            const targetScroll = targetCard.offsetLeft - ((window.innerWidth - targetCard.offsetWidth) / 2);
+            slider.style.scrollSnapType = 'none'; 
+            slider.scrollTo({ left: targetScroll, behavior: 'smooth' });
+            clearTimeout(snapTimeout);
+            snapTimeout = setTimeout(() => { slider.style.scrollSnapType = 'x mandatory'; }, 600);
+        };
+
+        const stopDragAndSnap = () => {
+            if (!isDown) return; isDown = false; slider.classList.remove('active'); scrollToCardIndex(getCenterCardIndex());
+        };
+        slider.addEventListener('mouseup', stopDragAndSnap); slider.addEventListener('mouseleave', stopDragAndSnap);
+        window.addEventListener('keydown', (e) => {
+            if(!document.getElementById('main-app').classList.contains('show-app') || isAnimatingEntry) return;
+            if (e.key === 'ArrowRight') scrollToCardIndex(getCenterCardIndex() + 1);
+            else if (e.key === 'ArrowLeft') scrollToCardIndex(getCenterCardIndex() - 1);
+        });
+
+        // ================= OPEN / FLY-LEFT CLOSE MODAL =================
+        const contentCards = document.querySelectorAll('.content-card');
+        const modal = document.getElementById('video-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const video = document.getElementById('saka-video');
+        const videoLoader = document.getElementById('video-loader');
+        
+        contentCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (isDragging || isAnimatingEntry) return; 
+                preInitAudio();
+                playCinematicWhoosh(); 
+                
+                videoLoader.classList.remove('hidden');
+                
+                modal.classList.remove('closing');
+                modal.classList.add('show');
+                
+                setTimeout(() => { video.play(); }, 800); 
+            });
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            preInitAudio();
+            playCinematicWhoosh(); 
+            
+            modal.classList.remove('show');
+            modal.classList.add('closing'); 
+            
+            setTimeout(() => {
+                video.pause(); 
+                video.currentTime = 0; 
+                modal.classList.remove('closing'); 
+            }, 1200); 
+        });
+
+        // ================= SAKA VIDEO LOADER LOGIC =================
+        video.addEventListener('playing', () => {
+            videoLoader.classList.add('hidden');
+        });
+
+        video.addEventListener('waiting', () => {
+            videoLoader.classList.remove('hidden');
+        });
+
+    </script>
+</body>
+</html>
