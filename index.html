@@ -350,6 +350,38 @@
                 -webkit-box-reflect: below 10px linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, transparent 100%);
             }
         }
+
+        /* ================= 📱 MOBILE LANDSCAPE TWEAKS ================= */
+        @media (orientation: landscape) and (max-height: 500px) {
+            :root { 
+                --card-width: 250px;  
+                --card-height: 140px; 
+            }
+            
+            header { padding: 10px 20px; }
+            .header-logo { font-size: 1.4rem; }
+            
+            .video-track { 
+                padding: 60px calc(50vw - (var(--card-width) / 2)) 80px calc(50vw - (var(--card-width) / 2)); 
+                align-items: center;
+            }
+            
+            .logo-text { font-size: 3vw !important; }
+            
+            .card-title { font-size: 0.9rem; margin-bottom: 4px; } 
+            .card-meta { font-size: 0.65rem; padding: 4px 8px; }
+            
+            .btn-play { width: 35px; height: 35px; }
+            .btn-play::after { border-width: 5px 0 5px 8px; margin-left: 4px; }
+            
+            .card-overlay { padding: 10px; }
+            
+            .disclaimer-text { font-size: 0.75rem; padding: 0 10px; transform: translateY(10px); }
+            .disclaimer-text strong.main-title { font-size: 1rem; padding: 5px 15px; margin-bottom: 10px; }
+            .disclaimer-details { margin-top: 15px; padding-top: 15px; }
+            
+            .btn-close-modal { top: 10px; right: 20px; width: 35px; height: 35px; font-size: 1.5rem; }
+        }
         
         /* ================= SAKA VIDEO PLAYER (MODAL) ================= */
         .video-modal {
