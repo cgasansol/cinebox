@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Cinebox - Epic Flying Carpet Intro</title>
     
+    <!-- PWA Meta Tags & Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#030000">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+    
     <!-- Premium Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
 
@@ -528,6 +535,20 @@
     </div>
 
     <script>
+        // ================= SERVICE WORKER REGISTRATION =================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered successfully with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+        // ===============================================================
+
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx; 
 
@@ -538,7 +559,7 @@
             intervalId: null,
             
             play: function() {
-                clearInterval(this.intervalId); // Cancel any ongoing fade
+                clearInterval(this.intervalId); 
                 
                 if (this.audio.paused) {
                     this.audio.play().catch(e => console.warn("Browser blocked autoplay.", e));
@@ -546,7 +567,7 @@
                 
                 this.intervalId = setInterval(() => {
                     let newVol = this.audio.volume + 0.03; 
-                    if (newVol >= this.maxVol - 0.01) { // Safe floating point margin
+                    if (newVol >= this.maxVol - 0.01) { 
                         this.audio.volume = this.maxVol;
                         clearInterval(this.intervalId);
                     } else {
@@ -556,11 +577,11 @@
             },
             
             pause: function() {
-                clearInterval(this.intervalId); // Cancel any ongoing fade
+                clearInterval(this.intervalId); 
                 
                 this.intervalId = setInterval(() => {
                     let newVol = this.audio.volume - 0.05;
-                    if (newVol <= 0.02) { // Safe floating point margin
+                    if (newVol <= 0.02) { 
                         this.audio.volume = 0;
                         this.audio.pause();
                         clearInterval(this.intervalId);
@@ -571,14 +592,12 @@
             }
         };
 
-        // 4 Second Loop Silence Logic
         BGM.audio.addEventListener('ended', () => {
             setTimeout(() => {
                 BGM.audio.currentTime = 0;
                 BGM.play();
             }, 4000); 
         });
-        // ===================================================================
 
         function preInitAudio() { if (!audioCtx) audioCtx = new AudioContext(); }
 
@@ -668,10 +687,8 @@
                                                     blackTransition.style.opacity = '0'; 
                                                     mainApp.classList.add('show-app');
                                                     
-                                                    // --- START BGM (FADE IN) HERE ---
                                                     BGM.audio.volume = 0;
                                                     BGM.play();
-                                                    // --------------------------------
 
                                                     currentActiveIndex = getCenterCardIndex(); 
                                                     
@@ -752,10 +769,8 @@
         });
         window.addEventListener('resize', () => { requestAnimationFrame(updateCarousel3D); });
 
-        // ================= SMART DRAG (Mouse & Touch) =================
         let isDown = false; let isDragging = false; let startX, scrollLeft, mouseDownX; let snapTimeout;
 
-        // --- BGM FALLBACK (Fires only once to bypass browser block) ---
         let hasInteracted = false;
         function handleUserInteraction() {
             preInitAudio();
@@ -764,7 +779,6 @@
                     BGM.play();
                 }
                 hasInteracted = true;
-                // Cleanup: So it never interferes with future clicks
                 window.removeEventListener('mousedown', handleUserInteraction);
                 window.removeEventListener('touchstart', handleUserInteraction);
                 window.removeEventListener('keydown', handleUserInteraction);
@@ -773,9 +787,7 @@
         window.addEventListener('mousedown', handleUserInteraction); 
         window.addEventListener('touchstart', handleUserInteraction, {once: true}); 
         window.addEventListener('keydown', handleUserInteraction);
-        // --------------------------------------------------------------
 
-        // MOUSE EVENTS
         slider.addEventListener('mousedown', (e) => {
             if (isAnimatingEntry) return; 
             isDown = true; isDragging = false; mouseDownX = e.pageX;
@@ -790,7 +802,6 @@
             slider.scrollLeft = scrollLeft - walk; updateCarousel3D(); 
         });
 
-        // TOUCH EVENTS
         slider.addEventListener('touchstart', (e) => {
             if (isAnimatingEntry) return; 
             isDown = true; isDragging = false; mouseDownX = e.touches[0].pageX;
@@ -829,7 +840,6 @@
             else if (e.key === 'ArrowLeft') scrollToCardIndex(getCenterCardIndex() - 1);
         });
 
-        // ================= OPEN / FLY-LEFT CLOSE MODAL =================
         const contentCards = document.querySelectorAll('.content-card');
         const modal = document.getElementById('video-modal');
         const closeModalBtn = document.getElementById('close-modal');
@@ -842,9 +852,7 @@
                 preInitAudio();
                 playCinematicWhoosh(); 
                 
-                // --- PAUSE BGM ON VIDEO PLAY ---
                 BGM.pause();
-                // -------------------------------
                 
                 videoLoader.classList.remove('hidden');
                 
@@ -859,9 +867,7 @@
             preInitAudio();
             playCinematicWhoosh(); 
             
-            // --- RESUME BGM ON VIDEO CLOSE ---
             BGM.play();
-            // ---------------------------------
 
             modal.classList.remove('show');
             modal.classList.add('closing'); 
@@ -873,7 +879,6 @@
             }, 1200); 
         });
 
-        // ================= SAKA VIDEO LOADER LOGIC =================
         video.addEventListener('playing', () => {
             videoLoader.classList.add('hidden');
         });
